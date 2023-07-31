@@ -52,7 +52,7 @@ if userInput == "1" then
     os.sleep(1)
     goto start
   end
-  launch.setCoords(X, Y)
+  launch.setCoords(X, Z)
   print("Target selection: complete")
   os.sleep(0.5)
   io.write("Current energy level: ")
