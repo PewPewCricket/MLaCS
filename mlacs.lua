@@ -156,7 +156,7 @@ elseif userInput == "3" then
     local userCodesInput = io.read()
     if userCodesInput == oldCodes then
       term.setCursor(1, 3)
-      io.open("/etc/Launchcodes.txt", "w")
+      local codesFile = io.open("/etc/Launchcodes.txt", "w")
       io.write("Input new codes: ")
       local newCodes = io.read()
       codesFile:write(newCodes)
