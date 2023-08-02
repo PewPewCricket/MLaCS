@@ -1,12 +1,55 @@
 local term = require("term")
 local component = require("component")
-local data = require("data")
+local data = component.data
 local fs = require("filesystem")
 local launch = component.getPrimary("launch_pad")
 --define variables
 local X = nil
 local Z = nil
 --local yield = nil
+local launch_code
+
+--Encryption functions for launch codes (gamma :3):
+local function encrypt(info) -- i hate AES encryption, why does everything have to be 128 bit >:(
+  local key = string.sub(component.computer.address, 0, 8) .. string.sub(component.data.address, 0, 8) -- generate a new key depending on the computer address
+  local IV = string.sub(component.computer.address, 0, 8) .. string.sub(component.filesystem.address, 0, 8) -- generate an IV for additional security
+  return data.encrypt(info, key, IV) -- return the encrypted data
+end
+local function decrypt(info)
+  local key = string.sub(component.computer.address, 0, 8) .. string.sub(component.data.address, 0, 8) -- generate the (hopefully) existing key for decryption
+  local IV  = string.sub(component.computer.address, 0, 8) .. string.sub(component.filesystem.address, 0, 8)
+  return data.decrypt(info, key, IV) -- return the decrypted data
+end
+
+-- data checks just in-case
+if not component.isAvailable("data") then
+  print("A data card tier 2 or better is required, insert the card and then run again.")
+  os.exit(-1)
+end
+if not fs.exists("/etc/Launchcodes.txt") then -- add a default key if none is present
+  print("Populating code file for initial startup...")
+  local f = io.open("/etc/Launchcodes.txt", "w")
+  f:write(encrypt("a1b2c3")) --change this string to any default key you want, sadly can't be an empty string or 0 in a string.
+  local f2 = io.open("/etc/checksum.txt", "w")
+  f2:write(data.encode64(data.md5(encrypt("a1b2c3"))))
+  f:close()
+  f2:close()
+  os.sleep(3)
+  print("File populated, starting program...")
+  os.sleep(1)
+end
+local f = io.open("/etc/Launchcodes.txt", "r")
+local f2 = io.open("/etc/checksum.txt", "r")
+if not(data.md5(f:read("*l")) == data.decode64(f2:read("*l"))) then
+  print("Code checksum invalid, the launch codes have likely been tampered with. This program will not start, the key must be reset manually.")
+  f2:close()
+  f:close()
+  fs.remove("/etc/checksum.txt")
+  os.exit(-1)
+end
+f2:close()
+f:close()
+--end data checks
 
 --text printing
 ::start::
@@ -35,10 +78,10 @@ if userInput == "1" then
   io.write("Please input launch codes: ")
   local codesInput = io.read()
   local codesFile = io.open("/etc/Launchcodes.txt", "r")
-  local launchcodes = codesFile:read("*l")
+  launch_code = decrypt(codesFile:read("*l"))
   codesFile:close()
-  
-  if codesInput == launchCodes then
+
+  if codesInput == launch_code then
     term.setCursor(1, 3)
     codesCheck = true
   end
@@ -153,17 +196,24 @@ elseif userInput == "3" then
   if userInputCfg == "1" then
     term.clear()
     local codesFile = io.open("/etc/Launchcodes.txt", "r")
-    oldCodes = codesFile:read("*l")
+    oldCodes = decrypt(codesFile:read("*l"))
     codesFile:close()
     io.write("Input current codes: ")
     local userCodesInput = io.read()
     if userCodesInput == oldCodes then
       term.setCursor(1, 3)
-      local codesFile = io.open("/etc/Launchcodes.txt", "w")
       io.write("Input new codes: ")
       local newCodes = io.read()
-      codesFile:write(newCodes)
+      fs.remove("/etc/Launchcodes.txt")
+      fs.remove("/etc/checksum.txt")
+      codesFile = io.open("/etc/Launchcodes.txt", "w")
+      local chksum = io.open("/etc/checksum.txt", "w")
+      codesFile:write(encrypt(newCodes))
       codesFile:close()
+      codesFile = io.open("/etc/Launchcodes.txt", "r")
+      chksum:write(data.encode64(data.md5(codesFile:read("*l"))))
+      codesFile:close()
+      chksum:close()
       os.sleep(0.5)
       term.setCursor(1, 5)
       print("Codes changed")
