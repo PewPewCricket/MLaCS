@@ -12,7 +12,7 @@ local Z = nil
 ::start::
 local energyLevel = launch.getEnergyStored()
 term.clear()
-print("\27[32mMissile Launch and Control System v1.2\27[0m")
+print("\27[32mMissile Launch and Control System v1.3a\27[0m")
 os.sleep(1)
 print(" ")
 print(" ")
