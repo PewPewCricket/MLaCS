@@ -40,8 +40,8 @@ if not fs.exists("/etc/Launchcodes.txt") then -- add a default key if none is pr
 end
 local f = io.open("/etc/Launchcodes.txt", "r")
 local f2 = io.open("/etc/checksum.txt", "r")
-if not(data.md5(f:read("*l")) == data.decode64(f2:read("*l"))) then
-  print("Code checksum invalid, the launch codes have likely been tampered with. This program will not start, the key must be reset manually.")
+if not fs.exists("/etc/checksum.txt") or not(data.md5(f:read("*l")) == data.decode64(f2:read("*l"))) then
+  print("Code checksum invalid, the launch codes have likely been tampered with. This program will not start, the key must be reset manually. Refer to the README for help.")
   f2:close()
   f:close()
   fs.remove("/etc/checksum.txt")
