@@ -34,6 +34,9 @@ if userInput == "1" then
   term.clear()
   io.write("Please input launch codes: ")
   local codesInput = io.read()
+  local codesFile = io.open("/etc/Launchcodes.txt", "r")
+  local launchcodes = codesFile:read("*l")
+  codesFile:close()
   
   if codesInput == launchCodes then
     term.setCursor(1, 3)
