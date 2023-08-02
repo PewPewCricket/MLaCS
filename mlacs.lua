@@ -36,6 +36,7 @@ if userInput == "1" then
   term.clear()
   io.write("Please input launch codes: ")
   local codesInput = io.read()
+  
   if codesInput == launchCodes then
     term.setCursor(1, 3)
     codesCheck = true
@@ -52,47 +53,47 @@ if userInput == "1" then
   os.sleep(0.5)
   print("Authentication: complete")
   os.sleep(0.5)
+  
   if X == nil or Z == nil then
     print("Target selection: failed")
     os.sleep(1)
     goto start
+  else
+    launch.setCoords(X, Z)
+    print("Target selection: complete")
+    os.sleep(0.5)
   end
   
-  launch.setCoords(X, Z)
-  print("Target selection: complete")
-  os.sleep(0.5)
   if energyLevel < 100000 then
     io.stderr:write("Energy level: insufficient")
     os.sleep(1)
     goto start
-    
-    else
-    print("Energy level: sufficient")
-  end
-    
-  term.setCursor(1, 7)
-  print("Are you sure you want to launch? (y/n)")
-  local finalAuth = io.read()
-  if finalAuth == "n" then
-    term.setCursor(1, 9)
-    print("returning...")
-    os.sleep(1)
-    goto start
-  elseif finalAuth == "y" then
-    term.setCursor(1, 9)
-    print("Launching...")
-    os.sleep(1)
-    launch.launch()
-    os.sleep(1)
-    goto start
   else
-    term.setCursor(1, 9)
-    io.stderr:write("invalid input")
-    goto start
+    print("Energy level: sufficient")
+    term.setCursor(1, 7)
+    print("Are you sure you want to launch? (y/n)")
+    local finalAuth = io.read()
+  
+    if finalAuth == "n" then
+      term.setCursor(1, 9)
+      print("returning...")
+      os.sleep(1)
+      goto start
+    elseif finalAuth == "y" then
+      term.setCursor(1, 9)
+      print("Launching...")
+      os.sleep(1)
+      launch.launch()
+      os.sleep(1)
+      goto start
+    else
+      term.setCursor(1, 9)
+      io.stderr:write("invalid input")
+      goto start
+    end
   end
   
-  
-  elseif userInput == "removed" then
+  --elseif userInput == "removed" then
   --Yield selection
     --term.clear()
     --print("Please Select Yield (150-957kt)")
@@ -109,7 +110,7 @@ if userInput == "1" then
       --io.stderr:write("invalid input")
       --os.sleep(1)
     --end
-    goto start
+    --goto start
     
   elseif userInput == "2" then
   --target select
@@ -136,6 +137,7 @@ if userInput == "1" then
       os.sleep(1)
       goto start
     end
+  
   elseif userInput == "3" then
   --config
     ::config::
@@ -160,8 +162,7 @@ if userInput == "1" then
         print("Codes changed")
         os.sleep(1)
         goto start
-        
-        else
+      else
         term.setCursor(1, 5)
         io.stderr:write("Invalid codes")
         os.sleep(1)
@@ -171,12 +172,12 @@ if userInput == "1" then
       elseif userInputCfg == "2" then
         os.sleep(1)
         goto start
-      
+    
       else
-      term.setCursor(1, 8)
-      io.stderr:write("invalid input")
-      os.sleep(1)
-      goto config
+        term.setCursor(1, 8)
+        io.stderr:write("invalid input")
+        os.sleep(1)
+        goto config
     end
     
   elseif userInput == "4" then
